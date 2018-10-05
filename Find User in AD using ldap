@@ -1,0 +1,27 @@
+  public static DirectorySearcher ds = null;
+  public static SearchResult rs = null;
+  public static int ID=123;
+  public static void Main(string[] args)
+        {
+           rs= SearchUserByUserName(ds, ID);//ds ----->refer the connect to AD in previous file
+           if (rs != null)
+                        {
+                           OutFileWriter.WriteLine(" Person ID-" + ID + " Exists");
+                        }
+                        else
+                        {   OutFileWriter.WriteLine(" Person ID-" + ID + "not Exist");
+                        }
+                                      
+         }                             
+         public static SearchResult SearchUserByUserName(DirectorySearcher ds, string username)
+        {
+            ds.Filter = "(&((&(objectCategory=Person)(objectClass=User)))(Company=" + username + "))";
+            ds.SearchScope = SearchScope.Subtree;
+            ds.ServerTimeLimit = TimeSpan.FromSeconds(90);
+            SearchResult userObject = ds.FindOne();
+
+            if (userObject != null)
+                return userObject;
+            else
+                return null;
+        }
