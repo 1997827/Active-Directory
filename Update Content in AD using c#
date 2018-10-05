@@ -1,0 +1,61 @@
+   
+    public static void Main(string[] args)
+        { 
+        
+        SearchResult rs = null;
+         rs = SearchUserByUserName(ds, Code);//Find the person exsist and grab all data
+                  
+          rs = Update(ds, Code);
+                  
+                    if (rs != null)
+                    {
+                        ShowUserInformation(rs, DisplayName);
+                    }
+                    else
+                    {
+                        OutFileWriter.WriteLine("User ID-" + Code + "not Exist");
+                    }
+          }
+          
+           public static SearchResult SearchUserByUserName(DirectorySearcher ds, string username)
+        {
+            ds.Filter = "(&((&(objectCategory=Person)(objectClass=User)))(Company=" + username + "))";
+            ds.SearchScope = SearchScope.Subtree;
+            ds.ServerTimeLimit = TimeSpan.FromSeconds(90);
+            SearchResult userObject = ds.FindOne();
+
+            if (userObject != null)
+                return userObject;
+            else
+                return null;
+        }
+           public static void Update(SearchResult rs, string DisplayName)
+        {
+            if ((rs.GetDirectoryEntry().Properties["displayname"].Value != null)&&(DisplayName!=null))
+            {
+
+                string dn = rs.GetDirectoryEntry().Properties["displayname"].Value.ToString();
+                if (dn != DisplayName)
+                {
+                    using (DirectoryEntry entryToModify = rs.GetDirectoryEntry())
+                    {
+                        try
+                        {
+                            entryToModify.Properties["displayname"].Clear();
+                            entryToModify.Properties["displayname"].Add(DisplayName);
+                            entryToModify.CommitChanges();
+                            OutFileWriter.WriteLine("**********Updated Displayname:{0}", DisplayName+"**********");
+
+                        }
+                        catch (Exception e)
+                        {
+                           
+                        }
+                    }
+                }
+                else
+                {
+                    OutFileWriter.WriteLine("No change in  Displayname:{0}", DisplayName);
+
+                }
+            }
